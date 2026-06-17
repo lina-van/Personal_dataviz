@@ -341,6 +341,7 @@ const EDGES = [
   { from:'outlook',       to:'onaConcept',    style:'feed' },
   { from:'icims',         to:'capConcept',    style:'feed' },
   { from:'survey',        to:'survConcept',   style:'feed' },
+
   // Workday also feeds ONA
   { from:'workday',       to:'onaConcept',    style:'feed' },
 
@@ -349,6 +350,8 @@ const EDGES = [
 
   // Concept → projects (drawn as straight verticals by renderer)
   { from: 'survConcept', to: 'surveyRep', style:'feed' },
+  { from: 'icims',       to: 'recCap',    style:'feed' },
+  { from: 'icims',       to: 'scCap',      style:'feed' },
 
   // Quality dependencies (job arch → ONA projects)
   { from:'jobArch', to:'succession',  style:'quality', label:'quality feeds' },
