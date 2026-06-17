@@ -347,6 +347,8 @@ const EDGES = [
 
   // Concept structural dependency
   { from:'semSimConcept', to:'onaConcept',    style:'structural', label:'informs' },
+  { from:'onaConcept', to:'survConcept',    style:'structural', label:'informs' },
+
 
   // Concept → projects (drawn as straight verticals by renderer)
   { from: 'survConcept', to: 'surveyRep', style:'feed' },
