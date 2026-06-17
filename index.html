@@ -69,7 +69,7 @@
 <body>
 <div class="page">
 <header>
-  <h1>People Analytics — Portfolio Map</h1>
+  <h1>People Analytics Portfolio Map</h1>
   <p>Hover any node for details</p>
 </header>
 
@@ -198,7 +198,7 @@ const NODES = [
     id:'jobArch', col:'semSim', row:'proj0', type:'project',
     label:['Job architecture','JD similarity + comp alignment','🔶 In Progress'],
     fill:'#FAECE7', stroke:'#F0997B', textFill:['#4A1B0C','#993C1D','#993C1D'],
-    tip:'Owner: Comp team + Talent Digital Enablement. Assess JD overlap using embeddings; align skills to comp bands. Outputs feed ONA node labeling.'
+    tip:'Owner: Total Rewards + Talent Digital Enablement. Assess JD overlap using embeddings; align skills to comp bands. Outputs feed ONA node labeling.'
   },
   {
     id:'impactEx', col:'semSim', row:'proj1', type:'project',
@@ -250,15 +250,15 @@ const NODES = [
   // ── REPORTING / BI ──
   {
     id:'promoRep', col:'semSim', row:'reporting', type:'bi',
-    label:['Promotions reporting','Comp team · 🔶 In Progress'],
+    label:['Promotions reporting','Total Rewards · 🔶 In Progress'],
     fill:'#F1EFE8', stroke:'#B4B2A9', textFill:['#2C2C2A','#5F5E5A'],
-    tip:'Owner: Comp team. Reporting on promotion rates, timelines, comp outcomes by job family, level, demographics.'
+    tip:'Owner: Total Rewards. Reporting on promotion rates, timelines, comp outcomes by job family, level, demographics.'
   },
   {
     id:'jobRevRep', col:'semSim', row:'reporting2', type:'bi',
-    label:['Job review reporting','Comp team ·  🔶 In Progress'],
+    label:['Job review reporting','Total Rewards ·  🔶 In Progress'],
     fill:'#F1EFE8', stroke:'#B4B2A9', textFill:['#2C2C2A','#5F5E5A'],
-    tip:'Owner: Comp team. Track job review outcomes, grade changes, cycle timelines.'
+    tip:'Owner: Total Rewards. Track job review outcomes, grade changes, cycle timelines.'
   },
   {
     id:'capDash', col:'capacity', row:'reporting', type:'bi',
@@ -275,12 +275,12 @@ const NODES = [
   },
 
   // ── TEAMS — explicit x/y for stagger layout ──
-  // Row 1 (y=716): Comp team | Talent Planning | Org & Talent Readiness
+  // Row 1 (y=716): Total Rewards | Talent Planning | Org & Talent Readiness
   {
     id:'tComp', type:'team', x:40,  y:748, teamW:130,
-    label:['Comp team'],
+    label:['Total Rewards'],
     fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
-    tip:'Comp team: owns Job Architecture project, Promotions Reporting, Job Review Reporting'
+    tip:'Total Rewards: owns Job Architecture project, Promotions Reporting, Job Review Reporting'
   },
   {
     id:'tTP', type:'team', x:295, y:748, teamW:155,
