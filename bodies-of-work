@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>People Analytics Portfolio Map</title>
+<style>
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #f5f4f0;
+    color: #2c2c2a;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+
+  /* ── Page header ── */
+  header {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 20px;
+    font-weight: 500;
+    color: #2c2c2a;
+  }
+  header p {
+    font-size: 13px;
+    color: #5f5e5a;
+  }
+
+  /* ── Card wrapper ── */
+  .card {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  /* ── SVG nodes ── */
+  .node { cursor: pointer; }
+  .node:hover rect, .node:hover circle { opacity: 0.82; }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: fixed;
+    background: #2c2c2a;
+    color: #f5f4f0;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    max-width: 240px;
+    line-height: 1.5;
+    z-index: 999;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    max-width: 800px;
+    margin: 1rem auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    font-size: 12px;
+    color: #5f5e5a;
+    align-items: center;
+    padding: 0 0.25rem;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-line {
+    width: 28px;
+    height: 0;
+    flex-shrink: 0;
+  }
+
+  /* ── Edit tip ── */
+  .edit-tip {
+    max-width: 900px;
+    margin: 0.75rem auto 0;
+    font-size: 11px;
+    color: #888780;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>People Analytics — Portfolio Map</h1>
+</header>
+
+<div class="card">
+<svg id="map" width="100%" viewBox="0 0 860 980" role="img"
+     xmlns="http://www.w3.org/2000/svg">
+<title>People Analytics portfolio map</title>
+<desc>Data sources feed into three concept pillars (Semantic Similarity, ONA, Capacity Modeling), each owning projects linked to owning teams, with a shared Reporting/BI layer.</desc>
+
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- ══════════════════════════════════════
+     SECTION LABELS
+     To edit: change the text content only
+════════════════════════════════════════ -->
+<text x="40" y="32" font-size="11" fill="#888780" font-family="inherit" font-weight="500" letter-spacing="0.06em">DATA SOURCES</text>
+<text x="40" y="178" font-size="11" fill="#888780" font-family="inherit" font-weight="500" letter-spacing="0.06em">CONCEPT / SKILL</text>
+<text x="40" y="330" font-size="11" fill="#888780" font-family="inherit" font-weight="500" letter-spacing="0.06em">PROJECTS</text>
+<text x="40" y="706" font-size="11" fill="#888780" font-family="inherit" font-weight="500" letter-spacing="0.06em">OWNING TEAMS</text>
+<text x="40" y="530" font-size="11" fill="#888780" font-family="inherit" font-weight="500" letter-spacing="0.06em">REPORTING / BI</text>
+
+<!-- ══════════════════════════════════════
+     DATA SOURCES
+     Colors: teal (#0F6E56 fill, #9FE1CB stroke area)
+════════════════════════════════════════ -->
+<g class="node" data-tip="Workday: skills, profiles, goals, compensation data">
+  <rect x="40" y="40" width="155" height="44" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="117" y="58" font-size="13" font-weight="500" fill="#085041" font-family="inherit" text-anchor="middle" dominant-baseline="central">Workday</text>
+  <text x="117" y="74" font-size="11" fill="#0F6E56" font-family="inherit" text-anchor="middle" dominant-baseline="central">Skills, profiles, goals</text>
+</g>
+
+<g class="node" data-tip="Outlook / Calendar: meeting metadata for passive ONA (planned integration)">
+  <rect x="213" y="40" width="162" height="44" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="294" y="58" font-size="13" font-weight="500" fill="#085041" font-family="inherit" text-anchor="middle" dominant-baseline="central">Outlook / Calendar</text>
+  <text x="294" y="74" font-size="11" fill="#0F6E56" font-family="inherit" text-anchor="middle" dominant-baseline="central">Meeting metadata</text>
+</g>
+
+<g class="node" data-tip="iCIMS: recruiting data: requisition details, candidate pipelines, hiring timelines, complexity scores, volume, open/close dates for capacity modeling">
+  <rect x="395" y="40" width="162" height="44" rx="8" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="476" y="58" font-size="13" font-weight="500" fill="#085041" font-family="inherit" text-anchor="middle" dominant-baseline="central">iCIMS</text>
+  <text x="476" y="74" font-size="11" fill="#0F6E56" font-family="inherit" text-anchor="middle" dominant-baseline="central">Recruiting data</text>
+</g>
+
+
+<!-- ══════════════════════════════════════
+     DATA → CONCEPT FEED ARROWS
+════════════════════════════════════════ -->
+<path d="M117 84 L117 100 L135 100 L135 185" fill="none" stroke="#888780" stroke-width="0.5" marker-end="url(#arrow)" opacity="0.5"/>
+<path d="M195 62 L358 62 L358 185" fill="none" stroke="#888780" stroke-width="0.5" marker-end="url(#arrow)" opacity="0.5"/>
+<path d="M294 84 L294 130 L358 130 L358 185" fill="none" stroke="#888780" stroke-width="0.5" marker-end="url(#arrow)" opacity="0.5"/>
+<path d="M476 84 L476 130 L583 130 L583 185" fill="none" stroke="#888780" stroke-width="0.5" marker-end="url(#arrow)" opacity="0.4"/>
+
+<!-- ══════════════════════════════════════
+     CONCEPT PILLARS
+     Color: purple (#534AB7)
+════════════════════════════════════════ -->
+<g class="node" data-tip="Semantic Similarity: embedding-based comparison of job descriptions, skills, and worker profiles">
+  <rect x="40" y="185" width="190" height="56" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="135" y="205" font-size="13" font-weight="500" fill="#26215C" font-family="inherit" text-anchor="middle" dominant-baseline="central">Semantic similarity</text>
+  <text x="135" y="223" font-size="11" fill="#534AB7" font-family="inherit" text-anchor="middle" dominant-baseline="central">Embedding-based job matching</text>
+</g>
+
+<g class="node" data-tip="Org Network Analysis: graph metrics (betweenness centrality, Louvain communities, modularity) on collaboration data">
+  <rect x="258" y="185" width="200" height="56" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="358" y="205" font-size="13" font-weight="500" fill="#26215C" font-family="inherit" text-anchor="middle" dominant-baseline="central">Org network analysis</text>
+  <text x="358" y="223" font-size="11" fill="#534AB7" font-family="inherit" text-anchor="middle" dominant-baseline="central">Graph metrics, collaboration flows</text>
+</g>
+
+<g class="node" data-tip="Capacity Modeling: utilization tracking, predictive forecasting, assignment optimization">
+  <rect x="488" y="185" width="190" height="56" rx="8" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="583" y="205" font-size="13" font-weight="500" fill="#26215C" font-family="inherit" text-anchor="middle" dominant-baseline="central">Capacity modeling</text>
+  <text x="583" y="223" font-size="11" fill="#534AB7" font-family="inherit" text-anchor="middle" dominant-baseline="central">Utilization, prediction, opt.</text>
+</g>
+
+<!-- Structural dependency: Sem Sim → ONA (skills/profile clarity from Sem Sim informs ONA node labels) -->
+<path d="M230 213 L258 213" fill="none" stroke="#7F77DD" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arrow)" opacity="0.8"/>
+<text x="244" y="208" font-size="10" fill="#7F77DD" font-family="inherit" text-anchor="middle" opacity="0.9">informs</text>
+
+<!-- ══════════════════════════════════════
+     CONCEPT → PROJECT ARROWS
+════════════════════════════════════════ -->
+<line x1="135" y1="241" x2="135" y2="338" stroke="#888780" stroke-width="0.5" marker-end="url(#arrow)" opacity="0.4"/>
+<line x1="358" y1="241" x2="358" y2="338" stroke="#888780" stroke-width="0.5" marker-end="url(#arrow)" opacity="0.4"/>
+<line x1="583" y1="241" x2="583" y2="338" stroke="#888780" stroke-width="0.5" marker-end="url(#arrow)" opacity="0.4"/>
+
+<!-- ══════════════════════════════════════
+     PROJECTS — Semantic Similarity (coral)
+════════════════════════════════════════ -->
+<g class="node" data-tip="Owner: Comp team + Talent Digital Enablement. Assess JD overlap using embeddings; align skills to comp bands. Outputs (reorganized profiles, skill taxonomies) feed ONA node labeling. Status: In Progress.">
+  <rect x="40" y="338" width="190" height="70" rx="8" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+  <text x="135" y="358" font-size="13" font-weight="500" fill="#4A1B0C" font-family="inherit" text-anchor="middle" dominant-baseline="central">Job architecture</text>
+  <text x="135" y="375" font-size="11" fill="#993C1D" font-family="inherit" text-anchor="middle" dominant-baseline="central">JD similarity + comp alignment</text>
+  <text x="135" y="392" font-size="11" fill="#993C1D" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔶 In Progress</text>
+</g>
+
+<g class="node" data-tip="Owner: Talent Planning. Match workers to internal short-term projects via skills embeddings; proactive suggestions. Status: Exploratory.">
+  <rect x="40" y="428" width="190" height="70" rx="8" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+  <text x="135" y="448" font-size="13" font-weight="500" fill="#4A1B0C" font-family="inherit" text-anchor="middle" dominant-baseline="central">Impact Exchange</text>
+  <text x="135" y="465" font-size="11" fill="#993C1D" font-family="inherit" text-anchor="middle" dominant-baseline="central">Worker → project matching</text>
+  <text x="135" y="482" font-size="11" fill="#993C1D" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔷 Exploratory</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     PROJECTS — ONA (amber)
+════════════════════════════════════════ -->
+<g class="node" data-tip="Owner: Org &amp; Talent Readiness. Use network position + reporting lines to score succession pool health; identify cascade risks. Status: Exploratory.">
+  <rect x="258" y="338" width="195" height="70" rx="8" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+  <text x="355" y="358" font-size="13" font-weight="500" fill="#412402" font-family="inherit" text-anchor="middle" dominant-baseline="central">Succession planning</text>
+  <text x="355" y="375" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">Pool health, cascade risk</text>
+  <text x="355" y="392" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔷 Exploratory</text>
+</g>
+
+<g class="node" data-tip="Owner: People Analytics (your team). Map org collaboration graph; detect silos; connectivity scores. Outlook data integration planned. Status: In Progress.">
+  <rect x="258" y="428" width="195" height="70" rx="8" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+  <text x="355" y="448" font-size="13" font-weight="500" fill="#412402" font-family="inherit" text-anchor="middle" dominant-baseline="central">Network mapping</text>
+  <text x="355" y="465" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">Connectivity, silos, Outlook data</text>
+  <text x="355" y="482" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔶 In Progress</text>
+</g>
+
+<g class="node" data-tip="Owner: Talent Digital Enablement (product) + People Analytics (analytics) + Org &amp; Talent Readiness (vision). Find experts, mentors, similar-interest peers via skills graph. Status: Exploratory.">
+  <rect x="258" y="518" width="195" height="70" rx="8" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+  <text x="355" y="538" font-size="13" font-weight="500" fill="#412402" font-family="inherit" text-anchor="middle" dominant-baseline="central">Connections app</text>
+  <text x="355" y="555" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">Mentorship, expert finder</text>
+  <text x="355" y="572" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔷 Exploratory</text>
+</g>
+
+<g class="node" data-tip="Owner: Org &amp; Talent Readiness. Add connectivity scores as covariates to survey analysis; test burnout vs. network size hypotheses. Status: Exploratory.">
+  <rect x="258" y="608" width="195" height="70" rx="8" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+  <text x="355" y="628" font-size="13" font-weight="500" fill="#412402" font-family="inherit" text-anchor="middle" dominant-baseline="central">Survey augmentation</text>
+  <text x="355" y="645" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">Network scores + burnout signal</text>
+  <text x="355" y="662" font-size="11" fill="#854F0B" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔷 Exploratory</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     PROJECTS — Capacity (blue)
+════════════════════════════════════════ -->
+<g class="node" data-tip="Owner: Talent Acquisition. Model recruiter load by req complexity; predict future capacity; optimize assignment. Status: In Progress.">
+  <rect x="483" y="338" width="195" height="70" rx="8" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+  <text x="580" y="358" font-size="13" font-weight="500" fill="#042C53" font-family="inherit" text-anchor="middle" dominant-baseline="central">Recruiter capacity</text>
+  <text x="580" y="375" font-size="11" fill="#185FA5" font-family="inherit" text-anchor="middle" dominant-baseline="central">Req complexity, optimization</text>
+  <text x="580" y="392" font-size="11" fill="#185FA5" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔶 In Progress</text>
+</g>
+
+<g class="node" data-tip="Owner: Supply Chain. Adapt the recruiter capacity modeling framework for supply chain recruiter planning needs. Status: Exploratory.">
+  <rect x="483" y="428" width="195" height="70" rx="8" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+  <text x="580" y="448" font-size="13" font-weight="500" fill="#042C53" font-family="inherit" text-anchor="middle" dominant-baseline="central">Supply chain recruiter</text>
+  <text x="580" y="462" font-size="11" fill="#185FA5" font-family="inherit" text-anchor="middle" dominant-baseline="central">capacity</text>
+  <text x="580" y="478" font-size="11" fill="#185FA5" font-family="inherit" text-anchor="middle" dominant-baseline="central">Adapted model, same framework</text>
+  <text x="580" y="494" font-size="11" fill="#185FA5" font-family="inherit" text-anchor="middle" dominant-baseline="central">🔷 Exploratory</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     SOFT QUALITY DEPENDENCIES
+     Job Architecture project → ONA projects
+     (interpretation suffers if job arch is inaccurate)
+════════════════════════════════════════ -->
+<path d="M230 362 L250 362 L250 373 L258 373" fill="none" stroke="#BA7517" stroke-width="0.9" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.6"/>
+<path d="M230 372 L250 372 L250 463 L258 463" fill="none" stroke="#BA7517" stroke-width="0.9" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.6"/>
+<path d="M230 382 L242 382 L242 553 L258 553" fill="none" stroke="#BA7517" stroke-width="0.9" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.6"/>
+<text x="226" y="438" font-size="10" fill="#BA7517" font-family="inherit" text-anchor="middle" opacity="0.8" transform="rotate(-90,226,438)">quality feeds</text>
+
+<!-- ══════════════════════════════════════
+     REPORTING / BI (gray)
+════════════════════════════════════════ -->
+<g class="node" data-tip="Owner: Comp team. Reporting on promotion rates, timelines, comp outcomes. Status: In Progress.">
+  <rect x="40" y="538" width="168" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="124" y="558" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Promotions reporting</text>
+  <text x="124" y="576" font-size="11" fill="#5F5E5A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Comp team · In Progress</text>
+</g>
+
+<g class="node" data-tip="Owner: Comp team. Track job review outcomes, grade changes, cycle timelines. Status: In Progress.">
+  <rect x="40" y="614" width="168" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="124" y="634" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Job review reporting</text>
+  <text x="124" y="652" font-size="11" fill="#5F5E5A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Comp team · In Progress</text>
+</g>
+
+<g class="node" data-tip="Owner: Talent Acquisition. Dashboard surfacing recruiter capacity model outputs. Status: In Progress.">
+  <rect x="483" y="538" width="195" height="56" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="580" y="558" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Capacity dashboard</text>
+  <text x="580" y="576" font-size="11" fill="#5F5E5A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Talent Acquisition · In Progress</text>
+</g>
+
+<!-- Capacity project → Capacity dashboard -->
+<path d="M580 508 L580 538" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.4"/>
+
+<!-- ══════════════════════════════════════
+     TEAMS
+     People Analytics = green highlight
+════════════════════════════════════════ -->
+<!-- Row 1 -->
+<g class="node" data-tip="Comp team: owns Job Architecture project, Promotions Reporting, Job Review Reporting">
+  <rect x="40" y="716" width="120" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="100" y="738" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Comp team</text>
+</g>
+
+<g class="node" data-tip="Talent Digital Enablement: owns job architecture data layer (co-owner) and Connections app product vision">
+  <rect x="172" y="716" width="198" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="271" y="738" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Talent Digital Enablement</text>
+</g>
+
+<g class="node" data-tip="Talent Planning: owns Impact Exchange product and use case">
+  <rect x="382" y="716" width="130" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="447" y="738" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Talent Planning</text>
+</g>
+
+<g class="node" data-tip="Org &amp; Talent Readiness: owns Succession Planning, Connections app, and Survey Augmentation">
+  <rect x="502" y="716" width="175" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="589" y="738" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Org &amp; Talent Readiness</text>
+</g>
+
+<!-- Row 2 -->
+<g class="node" data-tip="People Analytics: owns Network Mapping; analytics layer for Connections app; all ONA methodology">
+  <rect x="40" y="776" width="152" height="44" rx="8" fill="#EAF3DE" stroke="#97C459" stroke-width="1"/>
+  <text x="116" y="798" font-size="13" font-weight="500" fill="#173404" font-family="inherit" text-anchor="middle" dominant-baseline="central">People Analytics</text>
+</g>
+
+
+
+<g class="node" data-tip="Talent Acquisition: owns recruiter capacity model use case and dashboard">
+  <rect x="326" y="776" width="164" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="408" y="798" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Talent Acquisition</text>
+</g>
+
+<g class="node" data-tip="Supply Chain: wants to adapt the recruiter capacity modeling framework for their own planning needs">
+  <rect x="502" y="776" width="120" height="44" rx="8" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="562" y="798" font-size="13" font-weight="500" fill="#2C2C2A" font-family="inherit" text-anchor="middle" dominant-baseline="central">Supply Chain</text>
+</g>
+
+<!-- ══════════════════════════════════════
+     PROJECT → TEAM CONNECTORS
+════════════════════════════════════════ -->
+<!-- Job Arch → Comp team -->
+<path d="M135 408 L135 694 L100 694 L100 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Job Arch → Talent Digital Enablement -->
+<path d="M230 390 L230 694 L271 694 L271 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Impact Exchange → Talent Planning -->
+<path d="M135 498 L135 700 L447 700 L447 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Succession → Org & Talent Readiness -->
+<path d="M453 408 L589 408 L589 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Network Mapping → People Analytics -->
+<path d="M258 463 L116 463 L116 776" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Connections App → Talent Digital Enablement (product) + Org & Talent Readiness (vision) -->
+<path d="M355 588 L355 707 L271 707 L271 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<path d="M453 553 L589 553 L589 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Survey Augmentation → Org & Talent Readiness -->
+<path d="M258 643 L240 643 L240 700 L589 700 L589 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Promotions Reporting → Comp team -->
+<path d="M124 594 L100 594 L100 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Job Review Reporting → Comp team -->
+<path d="M124 670 L100 670 L100 716" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Recruiter Capacity → Talent Acquisition -->
+<path d="M580 498 L580 760 L408 760 L408 776" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Supply Chain project → Supply Chain team -->
+<path d="M678 463 L678 760 L562 760 L562 776" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.3"/>
+<!-- Capacity dashboard → Talent Acquisition -->
+<path d="M580 594 L580 760 L408 760" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" opacity="0.3"/>
+
+<!-- ══════════════════════════════════════
+     LEGEND ROW
+════════════════════════════════════════ -->
+<rect x="40" y="846" width="738" height="100" rx="8" fill="none" stroke="#D3D1C7" stroke-width="0.5"/>
+<text x="56" y="866" font-size="11" fill="#5F5E5A" font-family="inherit" font-weight="500">Legend</text>
+
+<rect x="56" y="874" width="12" height="12" rx="3" fill="#AFA9EC"/>
+<text x="74" y="884" font-size="11" fill="#5F5E5A" font-family="inherit">Concept / skill</text>
+
+<rect x="180" y="874" width="12" height="12" rx="3" fill="#9FE1CB"/>
+<text x="198" y="884" font-size="11" fill="#5F5E5A" font-family="inherit">Data source</text>
+
+<rect x="290" y="874" width="12" height="12" rx="3" fill="#F5C4B3"/>
+<text x="308" y="884" font-size="11" fill="#5F5E5A" font-family="inherit">Semantic similarity projects</text>
+
+<rect x="490" y="874" width="12" height="12" rx="3" fill="#FAC775"/>
+<text x="508" y="884" font-size="11" fill="#5F5E5A" font-family="inherit">ONA projects</text>
+
+<rect x="600" y="874" width="12" height="12" rx="3" fill="#B5D4F4"/>
+<text x="618" y="884" font-size="11" fill="#5F5E5A" font-family="inherit">Capacity projects</text>
+
+<rect x="56" y="898" width="12" height="12" rx="3" fill="#D3D1C7"/>
+<text x="74" y="908" font-size="11" fill="#5F5E5A" font-family="inherit">Reporting / BI · Teams</text>
+
+<rect x="210" y="898" width="12" height="12" rx="3" fill="#C0DD97"/>
+<text x="228" y="908" font-size="11" fill="#5F5E5A" font-family="inherit">Your team (People Analytics)</text>
+
+<text x="420" y="908" font-size="11" fill="#5F5E5A" font-family="inherit">🔶 In Progress  🔷 Exploratory</text>
+
+<line x1="570" y1="903" x2="600" y2="903" stroke="#BA7517" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrow)" opacity="0.9"/>
+<text x="608" y="908" font-size="11" fill="#BA7517" font-family="inherit">Quality dependency</text>
+
+<line x1="56" y1="933" x2="86" y2="933" stroke="#7F77DD" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arrow)" opacity="0.9"/>
+<text x="94" y="938" font-size="11" fill="#7F77DD" font-family="inherit">Structural dependency (concept layer)</text>
+
+</svg>
+</div>
+
+<!-- Legend below card -->
+<div class="legend">
+  <span style="font-size:12px;color:#888780;">Hover any node for details</span>
+</div>
+
+
+<!-- Tooltip logic -->
+<div id="tooltip"></div>
+<script>
+  const tip = document.getElementById('tooltip');
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      tip.textContent = el.dataset.tip;
+      tip.style.opacity = '1';
+    });
+    el.addEventListener('mousemove', e => {
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top  = (e.clientY - 10) + 'px';
+    });
+    el.addEventListener('mouseleave', () => {
+      tip.style.opacity = '0';
+    });
+  });
+</script>
+
+</body>
+</html>
