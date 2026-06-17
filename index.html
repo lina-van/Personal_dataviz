@@ -236,15 +236,15 @@ const NODES = [
   // ── CAPACITY PROJECTS ──
   {
     id:'recCap', col:'capacity', row:'proj0', type:'project',
-    label:['Recruiter capacity','Req complexity, optimization','🔶 In Progress'],
+    label:['SSA capacity','Req complexity, optimization','🔶 In Progress'],
     fill:'#E6F1FB', stroke:'#85B7EB', textFill:['#042C53','#185FA5','#185FA5'],
-    tip:'Owner: Talent Acquisition. Model recruiter load by req complexity; predict future capacity; optimize assignment.'
+    tip:'Owner: Talent Acquisition. Model SSA load by req complexity; predict future capacity; optimize assignment.'
   },
   {
     id:'scCap', col:'capacity', row:'proj1', type:'project',
-    label:['Supply chain recruiter capacity' , 'Adapted model','🔷 Exploratory'],
+    label:['CFA Supply SSA capacity' , 'Adapted model','🔷 Exploratory'],
     fill:'#E6F1FB', stroke:'#85B7EB', textFill:['#042C53','#185FA5','#185FA5'],
-    tip:'Owner: Supply Chain. Adapt the recruiter capacity modeling framework for supply chain recruiter planning needs.'
+    tip:'Owner: CFA Supply. Adapt the SSA capacity modeling framework for CFA Supply SSA planning needs.'
   },
 
   // ── REPORTING / BI ──
@@ -264,7 +264,7 @@ const NODES = [
     id:'capDash', col:'capacity', row:'reporting', type:'bi',
     label:['Capacity dashboard','Talent Acquisition ·  🔶 In Progress'],
     fill:'#F1EFE8', stroke:'#B4B2A9', textFill:['#2C2C2A','#5F5E5A'],
-    tip:'Owner: Talent Acquisition. Dashboard surfacing recruiter capacity model outputs.'
+    tip:'Owner: Talent Acquisition. Dashboard surfacing SSA capacity model outputs.'
   },
 
   {
@@ -299,9 +299,9 @@ const NODES = [
     id:'tTA', type:'team', x:850, y:748, teamW:180,
     label:['Talent Acquisition'],
     fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
-    tip:'Talent Acquisition: owns recruiter capacity model use case and dashboard'
+    tip:'Talent Acquisition: owns SSA capacity model use case and dashboard'
   },
-  // Row 2 (y=776): People Analytics | Talent Digital Enablement | Supply Chain
+  // Row 2 (y=776): People Analytics | Talent Digital Enablement | CFA Supply
   {
     id:'tPA', type:'team', x:850, y:854, teamW:168,
     label:['People Analytics'],
@@ -317,9 +317,9 @@ const NODES = [
   },
   {
     id:'tSC', type:'team', x:604, y:854, teamW:130,
-    label:['Supply Chain'],
+    label:['CFA Supply'],
     fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
-    tip:'Supply Chain: wants to adapt the recruiter capacity modeling framework for their own planning needs'
+    tip:'CFA Supply: wants to adapt the SSA capacity modeling framework for their own planning needs'
   },
   // Row 3 (y=846): Talent Acquisition — sits alone, centred under capacity work
   {
