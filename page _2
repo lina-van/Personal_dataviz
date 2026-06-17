@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>People Analytics Portfolio Map</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #f5f4f0;
+    color: #2c2c2a;
+    padding: 2rem;
+    min-height: 150vh;
+  }
+  .page { max-width: 1300px; margin: 0 auto; }
+  header { margin-bottom: 1.25rem; }
+  header h1 { font-size: 20px; font-weight: 500; }
+  header p  { font-size: 13px; color: #5f5e5a; margin-top: 2px; }
+
+  .layout { display: flex; gap: 1.5rem; align-items: flex-start; }
+
+  #map-card {
+    flex: 1 1 0; min-width: 0;
+    background: #fff;
+    border-radius: 12px;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+  #map-card svg { display: block; }
+
+  .legend-panel {
+    flex: 0 0 185px;
+    background: #fff;
+    border-radius: 12px;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font-size: 12px;
+    color: #5f5e5a;
+    position: sticky;
+    top: 2rem;
+  }
+  .legend-panel h2 { font-size: 11px; font-weight: 500; color: #888780; letter-spacing: 0.05em; }
+  .li { display: flex; align-items: center; gap: 8px; line-height: 1.3; }
+  .sw { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  hr.ld { border: none; border-top: 1px solid #E8E6DF; }
+  .dline { width: 28px; border-top: 2.5px dashed; flex-shrink: 0; position: relative; }
+  .dline::after { content:'▶'; font-size:7px; position:absolute; right:-5px; top:-7px; }
+
+  #tooltip {
+    position: fixed;
+    background: #2c2c2a; color: #f5f4f0;
+    font-size: 12px; padding: 6px 10px;
+    border-radius: 6px; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    max-width: 280px; line-height: 1.5; z-index: 999;
+  }
+  .edit-tip { font-size: 11px; color: #888780; margin-top: 0.75rem; }
+
+  /* node hover */
+  .map-node { cursor: default; }
+  .map-node:hover .node-bg { opacity: 0.82; }
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+  <h1>People Analytics — Portfolio Map</h1>
+  <p>Hover any node for details</p>
+</header>
+
+<div class="layout">
+  <div id="map-card"></div>
+
+  <div class="legend-panel">
+    <h2>LEGEND</h2>
+    <div class="li"><span class="sw" style="background:#AFA9EC"></span>Concept / skill</div>
+    <div class="li"><span class="sw" style="background:#9FE1CB"></span>Data source</div>
+    <div class="li"><span class="sw" style="background:#F5C4B3"></span>Sem. similarity</div>
+    <div class="li"><span class="sw" style="background:#FAC775"></span>ONA projects</div>
+    <div class="li"><span class="sw" style="background:#B5D4F4"></span>Capacity projects</div>
+    <div class="li"><span class="sw" style="background:#D3D1C7"></span>Reporting / BI </div>
+    <div class="li"><span class="sw" style="background:#C0DD97;border:1px solid #97C459"></span>Team</div>
+    <hr class="ld"/>
+    <div class="li">🔶 In Progress</div>
+    <div class="li">🔷 Exploratory</div>
+    <hr class="ld"/>
+    <div class="li"><span class="dline" style="border-color:#BA7517;color:#BA7517"></span><span style="color:#BA7517">Quality dep.</span></div>
+    <div class="li"><span class="dline" style="border-color:#7F77DD;color:#7F77DD"></span><span style="color:#7F77DD">Structural dep.</span></div>
+    <div class="li"><span class="dline" style="border-color:#888780;color:#888780"></span>Project → team</div>
+  </div>
+</div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  LAYOUT CONFIG — change these numbers to redistribute everything
+// ═══════════════════════════════════════════════════════════════════
+const LAYOUT = {
+  // Column x-centers (pixels)
+  cols: {
+    semSim:   190,   // Semantic similarity column
+    ona:      460,   // ONA column
+    capacity: 730,   // Capacity column
+    survey:   1000,  // Survey column (currently unused, but reserved for future expansion)
+  },
+  // Row y-positions (top of each band's nodes)
+  rows: {
+    dataSrc:   40,
+    concept:  185,
+    proj0:    338,   // first project row
+    proj1:    428,   // second project row
+    proj2:    518,   // third project row (ONA only)
+    proj3:    608,   // fourth project row (ONA only)
+    reporting:538,   // BI reporting (semSim/capacity cols)
+    reporting2:614,  // second BI row (semSim col only)
+    teams1:   788,   // first team row
+    teams2:   854,   // second team row
+    teams3:   931,   // third team row (overflow)
+  },
+  nodeW: 210,   // node width
+  nodeH:  70,   // project/concept node height
+  srcH:   44,   // data source node height
+  teamH:  44,   // team node height
+  biH:    56,   // BI node height
+  svgW:  1200,   // total SVG canvas width  ← change to widen canvas
+  svgH:  1050,   // total SVG canvas height ← change to lengthen canvas
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  NODE DATA
+//  id, col ('semSim'|'ona'|'capacity'), row (key from LAYOUT.rows),
+//  type ('source'|'concept'|'project'|'bi'|'team'),
+//  label (array of lines), color, tip
+// ═══════════════════════════════════════════════════════════════════
+const NODES = [
+  // ── DATA SOURCES ──
+  {
+    id:'workday', col:'semSim', row:'dataSrc', type:'source',
+    label:['Workday','Skills, profiles, goals'],
+    fill:'#E1F5EE', stroke:'#5DCAA5', textFill:['#085041','#0F6E56'],
+    tip:'Workday: skills, profiles, goals, compensation data'
+  },
+  {
+    id:'outlook', col:'ona', row:'dataSrc', type:'source',
+    label:['Outlook / Calendar','Meeting metadata'],
+    fill:'#E1F5EE', stroke:'#5DCAA5', textFill:['#085041','#0F6E56'],
+    tip:'Outlook / Calendar: meeting metadata for passive ONA (planned integration)'
+  },
+  {
+    id:'icims', col:'capacity', row:'dataSrc', type:'source',
+    label:['iCIMS','Recruiting data'],
+    fill:'#E1F5EE', stroke:'#5DCAA5', textFill:['#085041','#0F6E56'],
+    tip:'iCIMS: requisition details, candidate pipelines, hiring timelines, complexity scores'
+  },
+
+  {
+    id:'survey', col:'survey', row:'dataSrc', type:'source',
+    label:['Survey','Employee feedback, engagement'],
+    fill:'#E1F5EE', stroke:'#5DCAA5', textFill:['#085041','#0F6E56'],
+    tip:'Survey: employee feedback and engagement data'
+  },
+  // ── CONCEPT PILLARS ──
+  {
+    id:'semSimConcept', col:'semSim', row:'concept', type:'concept',
+    label:['Semantic similarity','Embedding-based job matching'],
+    fill:'#EEEDFE', stroke:'#AFA9EC', textFill:['#26215C','#534AB7'],
+    tip:'Semantic Similarity: embedding-based comparison of job descriptions, skills, and worker profiles'
+  },
+  {
+    id:'onaConcept', col:'ona', row:'concept', type:'concept',
+    label:['Org network analysis','Graph metrics, collaboration flows'],
+    fill:'#EEEDFE', stroke:'#AFA9EC', textFill:['#26215C','#534AB7'],
+    tip:'Org Network Analysis: graph metrics (betweenness centrality, Louvain communities, modularity) on collaboration data'
+  },
+
+  {
+    id:'capConcept', col:'capacity', row:'concept', type:'concept',
+    label:['Capacity modeling','Utilization, prediction, opt.'],
+    fill:'#EEEDFE', stroke:'#AFA9EC', textFill:['#26215C','#534AB7'],
+    tip:'Capacity Modeling: utilization tracking, predictive forecasting, assignment optimization'
+  },
+
+  {
+    id:'survConcept', col:'survey', row:'concept', type:'concept',
+    label:['SEM/HM modeling','Engagement prediction, risk assessment'],
+    fill:'#EEEDFE', stroke:'#AFA9EC', textFill:['#26215C','#534AB7'],
+    tip:'Survey Concept: engagement prediction and risk assessment'
+  },
+  // ── SEMANTIC SIMILARITY PROJECTS ──
+  {
+    id:'jobArch', col:'semSim', row:'proj0', type:'project',
+    label:['Job architecture','JD similarity + comp alignment','🔶 In Progress'],
+    fill:'#FAECE7', stroke:'#F0997B', textFill:['#4A1B0C','#993C1D','#993C1D'],
+    tip:'Owner: Comp team + Talent Digital Enablement. Assess JD overlap using embeddings; align skills to comp bands. Outputs feed ONA node labeling.'
+  },
+  {
+    id:'impactEx', col:'semSim', row:'proj1', type:'project',
+    label:['Impact Exchange','Worker → project matching',' 🔶 In Progress'],
+    fill:'#FAECE7', stroke:'#F0997B', textFill:['#4A1B0C','#993C1D','#993C1D'],
+    tip:'Owner: Talent Planning. Match workers to internal short-term projects via skills embeddings; proactive suggestions.'
+  },
+
+  // ── ONA PROJECTS ──
+  {
+    id:'succession', col:'ona', row:'proj0', type:'project',
+    label:['Succession planning','Pool health, cascade risk','🔷 Exploratory'],
+    fill:'#FAEEDA', stroke:'#FAC775', textFill:['#412402','#854F0B','#854F0B'],
+    tip:'Owner: Org & Talent Readiness. Use network position + reporting lines to score succession pool health; identify cascade risks.'
+  },
+  {
+    id:'netMap', col:'ona', row:'proj1', type:'project',
+    label:['Network mapping','Connectivity, silos, Outlook data','🔷 Exploratory'],
+    fill:'#FAEEDA', stroke:'#FAC775', textFill:['#412402','#854F0B','#854F0B'],
+    tip:'Owner: People Analytics (your team). Map org collaboration graph; detect silos; connectivity scores. Outlook data integration planned.'
+  },
+  {
+    id:'connections', col:'ona', row:'proj2', type:'project',
+    label:['Connections app','Mentorship, expert finder','🔷 Exploratory'],
+    fill:'#FAEEDA', stroke:'#FAC775', textFill:['#412402','#854F0B','#854F0B'],
+    tip:'Owner: Talent Digital Enablement (product) + People Analytics (analytics) + Org & Talent Readiness (vision). Find experts, mentors, similar-interest peers via skills graph.'
+  },
+  {
+    id:'surveyAug', col:'ona', row:'proj3', type:'project',
+    label:['Survey augmentation','Network scores + burnout signal','🔷 Exploratory'],
+    fill:'#FAEEDA', stroke:'#FAC775', textFill:['#412402','#854F0B','#854F0B'],
+    tip:'Owner: Org & Talent Readiness. Add connectivity scores as covariates to survey analysis; test burnout vs. network size hypotheses.'
+  },
+
+  // ── CAPACITY PROJECTS ──
+  {
+    id:'recCap', col:'capacity', row:'proj0', type:'project',
+    label:['SSA capacity','Req complexity, optimization','🔶 In Progress'],
+    fill:'#E6F1FB', stroke:'#85B7EB', textFill:['#042C53','#185FA5','#185FA5'],
+    tip:'Owner: Talent Acquisition. Model SSA load by req complexity; predict future capacity; optimize assignment.'
+  },
+  {
+    id:'scCap', col:'capacity', row:'proj1', type:'project',
+    label:['CFA Supply SSA capacity' , 'Adapted model','🔷 Exploratory'],
+    fill:'#E6F1FB', stroke:'#85B7EB', textFill:['#042C53','#185FA5','#185FA5'],
+    tip:'Owner: CFA Supply. Adapt the SSA capacity modeling framework for CFA Supply SSA planning needs.'
+  },
+
+  // ── REPORTING / BI ──
+  {
+    id:'promoRep', col:'semSim', row:'reporting', type:'bi',
+    label:['Promotions reporting','Comp team · 🔶 In Progress'],
+    fill:'#F1EFE8', stroke:'#B4B2A9', textFill:['#2C2C2A','#5F5E5A'],
+    tip:'Owner: Comp team. Reporting on promotion rates, timelines, comp outcomes by job family, level, demographics.'
+  },
+  {
+    id:'jobRevRep', col:'semSim', row:'reporting2', type:'bi',
+    label:['Job review reporting','Comp team ·  🔶 In Progress'],
+    fill:'#F1EFE8', stroke:'#B4B2A9', textFill:['#2C2C2A','#5F5E5A'],
+    tip:'Owner: Comp team. Track job review outcomes, grade changes, cycle timelines.'
+  },
+  {
+    id:'capDash', col:'capacity', row:'reporting', type:'bi',
+    label:['Capacity dashboard','Talent Acquisition ·  🔶 In Progress'],
+    fill:'#F1EFE8', stroke:'#B4B2A9', textFill:['#2C2C2A','#5F5E5A'],
+    tip:'Owner: Talent Acquisition. Dashboard surfacing SSA capacity model outputs.'
+  },
+
+  {
+    id:'surveyRep', col:'survey', row:'reporting', type:'bi',
+    label:['Survey reporting','People Analytics ·  🔶 In Progress'],
+    fill:'#F1EFE8', stroke:'#B4B2A9', textFill:['#2C2C2A','#5F5E5A'],
+    tip:'Owner: People Analytics. Dashboard surfacing survey insights and engagement metrics.'
+  },
+
+  // ── TEAMS — explicit x/y for stagger layout ──
+  // Row 1 (y=716): Comp team | Talent Planning | Org & Talent Readiness
+  {
+    id:'tComp', type:'team', x:40,  y:748, teamW:130,
+    label:['Comp team'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    tip:'Comp team: owns Job Architecture project, Promotions Reporting, Job Review Reporting'
+  },
+  {
+    id:'tTP', type:'team', x:295, y:748, teamW:155,
+    label:['Talent Planning'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    tip:'Talent Planning: owns Impact Exchange product and use case'
+  },
+  {
+    id:'tOTR', type:'team', x:568, y:748, teamW:210,
+    label:['Org & Talent Readiness'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    tip:'Org & Talent Readiness: owns Succession Planning, Connections app vision, and Survey Augmentation'
+
+  },
+ {
+    id:'tTA', type:'team', x:850, y:748, teamW:180,
+    label:['Talent Acquisition'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    tip:'Talent Acquisition: owns SSA capacity model use case and dashboard'
+  },
+  // Row 2 (y=776): People Analytics | Talent Digital Enablement | CFA Supply
+  {
+    id:'tPA', type:'team', x:850, y:854, teamW:168,
+    label:['People Analytics'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    strokeW: 1,
+    tip:'People Analytics (your team): owns Network Mapping; analytics layer for Connections app; all ONA methodology'
+  },
+  {
+    id:'tTDE', type:'team', x:316, y:854, teamW:210,
+    label:['Talent Digital Enablement'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    tip:'Talent Digital Enablement: co-owns job architecture data layer and Connections app product vision'
+  },
+  {
+    id:'tSC', type:'team', x:604, y:854, teamW:130,
+    label:['CFA Supply'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    tip:'CFA Supply: wants to adapt the SSA capacity modeling framework for their own planning needs'
+  },
+  // Row 3 (y=846): Talent Acquisition — sits alone, centred under capacity work
+  {
+    id:'tCult', type:'team', x:850, y:940, teamW:180,
+    label:['Culture'],
+    fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
+    tip:'Culture: owns culture-related initiatives and programs'
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  EDGE DATA
+//  from/to: node ids  |  style: 'feed'|'concept'|'quality'|'team'|'bi'
+//  label: optional rotated label
+// ═══════════════════════════════════════════════════════════════════
+const EDGES = [
+  // Data source → concept
+  { from:'workday',       to:'semSimConcept', style:'feed' },
+  { from:'outlook',       to:'onaConcept',    style:'feed' },
+  { from:'icims',         to:'capConcept',    style:'feed' },
+  { from:'survey',        to:'survConcept',   style:'feed' },
+
+  // Workday also feeds ONA
+  { from:'workday',       to:'onaConcept',    style:'feed' },
+
+  // Concept structural dependency
+  { from:'semSimConcept', to:'onaConcept',    style:'structural', label:'informs' },
+
+  // Concept → projects (drawn as straight verticals by renderer)
+  { from: 'survConcept', to: 'surveyRep', style:'feed' },
+  { from: 'icims',       to: 'recCap',    style:'feed' },
+  { from: 'icims',       to: 'scCap',      style:'feed' },
+
+  // Quality dependencies (job arch → ONA projects)
+  { from:'jobArch', to:'succession',  style:'quality', label:'quality feeds' },
+  { from:'jobArch', to:'netMap',      style:'quality' },
+  { from:'jobArch', to:'connections', style:'quality' },
+
+  // Capacity project → BI dashboard
+  { from:'recCap', to:'capDash', style:'bi' },
+
+ // Longitudinal BI dependency 
+  { from:'surveyRep', to:'surveyDash', style:'bi' },
+
+  // Project → team ownership
+  { from:'jobArch',    to:'tComp',  style:'team' },
+  { from:'jobArch',    to:'tTDE',   style:'team' },
+  { from:'impactEx',   to:'tTP',    style:'team' },
+  { from:'succession', to:'tOTR',   style:'team' },
+  { from:'netMap',     to:'tPA',    style:'team' },
+  { from:'connections',to:'tTDE',   style:'team' },
+  { from:'connections',to:'tOTR',   style:'team' },
+  { from:'surveyAug',  to:'tOTR',   style:'team' },
+  { from:'promoRep',   to:'tComp',  style:'team' },
+  { from:'jobRevRep',  to:'tComp',  style:'team' },
+  { from:'recCap',     to:'tTA',    style:'team' },
+  { from:'scCap',      to:'tSC',    style:'team' },
+  { from:'capDash',    to:'tTA',    style:'team' },
+  { from:'surveyRep',  to:'tPA',    style:'team' },
+  { from:'surveyRep',  to:'tCult',   style:'team' },
+
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  RENDERER — do not need to edit below this line for layout/content changes
+// ═══════════════════════════════════════════════════════════════════
+const L = LAYOUT;
+const NS = 'http://www.w3.org/2000/svg';
+
+function cx(node) {
+  if (node.x !== undefined) return node.x + (node.teamW || L.nodeW) / 2;
+  const base = L.cols[node.col];
+  return base + (node.xOffset || 0);
+}
+function cy(node) {
+  if (node.y !== undefined) return node.y;
+  return L.rows[node.row];
+}
+function nodeRect(node) {
+  const w = node.teamW || L.nodeW;
+  const h = node.type === 'source' ? L.srcH
+           : node.type === 'team'  ? L.teamH
+           : node.type === 'bi'    ? L.biH
+           : L.nodeH;
+  const x = cx(node) - w/2;
+  const y = cy(node);
+  return { x, y, w, h, midX: cx(node), midY: cy(node) + h/2 };
+}
+
+function el(tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function makePath(d, stroke, dash, opacity, marker) {
+  const attrs = { d, fill:'none', stroke, 'stroke-width': dash ? '1.8' : '1.5', opacity: opacity||'1' };
+  if (dash) attrs['stroke-dasharray'] = dash;
+  if (marker) attrs['marker-end'] = 'url(#arrow)';
+  return el('path', attrs);
+}
+
+function nodeById(id) { return NODES.find(n => n.id === id); }
+
+// Build node lookup: id → rect
+const rects = {};
+NODES.forEach(n => { rects[n.id] = nodeRect(n); });
+
+// ── Build SVG ──
+const svg = el('svg', {
+  id: 'map', width: '100%',
+  viewBox: `0 0 ${L.svgW} ${L.svgH}`,
+  role: 'img', xmlns: NS
+});
+
+// Arrow marker
+const defs = el('defs', {});
+const marker = el('marker', {
+  id:'arrow', viewBox:'0 0 10 10', refX:'8', refY:'5',
+  markerWidth:'6', markerHeight:'6', orient:'auto-start-reverse'
+});
+const mPath = el('path', {
+  d:'M2 1L8 5L2 9', fill:'none', stroke:'context-stroke',
+  'stroke-width':'1.5', 'stroke-linecap':'round', 'stroke-linejoin':'round'
+});
+marker.appendChild(mPath);
+defs.appendChild(marker);
+svg.appendChild(defs);
+
+// Section labels
+const sectionLabels = [
+  { text:'DATA SOURCES',  y: L.rows.dataSrc - 8  },
+  { text:'CONCEPT / SKILL', y: L.rows.concept - 8 },
+  { text:'PROJECTS',      y: L.rows.proj0 - 8    },
+  { text:'REPORTING / BI', y: L.rows.reporting - 8 },
+  { text:'OWNING TEAMS',  y: L.rows.teams1 - 8   },
+];
+sectionLabels.forEach(s => {
+  svg.appendChild(el('text', {
+    x:'40', y: s.y,
+    'font-size':'11', fill:'#888780', 'font-family':'inherit',
+    'font-weight':'500', 'letter-spacing':'0.06em'
+  }, s.text));
+});
+
+// ── Draw edges first (behind nodes) ──
+EDGES.forEach(edge => {
+  const fR = rects[edge.from];
+  const tR = rects[edge.to];
+  if (!fR || !tR) return;
+
+  const styleMap = {
+    feed:       { stroke:'#888780', dash: null,    opacity:'0.5',  marker: true, sw: '0.8' },
+    structural: { stroke:'#7F77DD', dash:'5 3',    opacity:'0.85', marker: true, sw: '3.5' },
+    quality:    { stroke:'#BA7517', dash:'4 3',    opacity:'0.65', marker: true, sw: '3.5' },
+    team:       { stroke:'#888780', dash:'4 3',    opacity:'0.3',  marker: true, sw: '3.5' },
+    bi:         { stroke:'#888780', dash:'4 3',    opacity:'0.45', marker: true, sw: '3.5' },
+  };
+  const s = styleMap[edge.style] || styleMap.team;
+
+  let d;
+  if (edge.style === 'feed') {
+    // data source → concept: elbow via a shared y midpoint
+    const midY = fR.midY + (tR.y - fR.y - fR.h/2) * 0.4;
+    d = `M${fR.midX} ${fR.y + fR.h} L${fR.midX} ${midY} L${tR.midX} ${midY} L${tR.midX} ${tR.y}`;
+  } else if (edge.style === 'structural') {
+    // horizontal between concepts
+    d = `M${fR.x + fR.w} ${fR.midY} L${tR.x} ${tR.midY}`;
+  } else if (edge.style === 'quality') {
+    // right-side exit from source node, route around to target
+    const xOut = fR.x + fR.w + 18;
+    d = `M${fR.x + fR.w} ${fR.midY} L${xOut} ${fR.midY} L${xOut} ${tR.midY} L${tR.x} ${tR.midY}`;
+  } else if (edge.style === 'team' || edge.style === 'bi') {
+    // route down then across
+    const exitY = Math.max(fR.y + fR.h, tR.y) - 14;
+    const entY  = tR.y;
+    if (Math.abs(fR.midX - tR.midX) < 10) {
+      d = `M${fR.midX} ${fR.y + fR.h} L${tR.midX} ${entY}`;
+    } else {
+      d = `M${fR.midX} ${fR.y + fR.h} L${fR.midX} ${exitY} L${tR.midX} ${exitY} L${tR.midX} ${entY}`;
+    }
+  }
+  if (d) svg.appendChild(makePath(d, s.stroke, s.dash, s.opacity, s.marker));
+
+  // Structural edge label
+  if (edge.label && edge.style === 'structural') {
+    const lx = (fR.x + fR.w + tR.x) / 2;
+    const ly = fR.midY - 5;
+    svg.appendChild(el('text', {
+      x: lx, y: ly, 'font-size':'10', fill:'#7F77DD',
+      'font-family':'inherit', 'text-anchor':'middle', opacity:'0.9'
+    }, edge.label));
+  }
+
+  // Quality edge vertical label
+  if (edge.style === 'quality' && edge.label) {
+    const xOut = fR.x + fR.w + 18;
+    const ly   = (fR.midY + tR.midY) / 2;
+    const txt  = el('text', {
+      x: xOut, y: ly, 'font-size':'10', fill:'#BA7517',
+      'font-family':'inherit', 'text-anchor':'middle', opacity:'0.8',
+      transform: `rotate(-90,${xOut},${ly})`
+    }, edge.label);
+    svg.appendChild(txt);
+  }
+});
+
+// Straight concept→project verticals
+['semSim','ona','capacity'].forEach(col => {
+  const conceptId = col + 'Concept';
+  const cR = rects[conceptId];
+  if (!cR) return;
+  const bottomY = cR.y + L.nodeH;
+  const topY    = L.rows.proj0;
+  svg.appendChild(makePath(
+    `M${cR.midX} ${bottomY} L${cR.midX} ${topY}`,
+    '#888780', null, '0.4', true
+  ));
+});
+
+// ── Draw nodes ──
+NODES.forEach(node => {
+  const r = rects[node.id];
+  const g = el('g', { class:'map-node' });
+  if (node.tip) g.setAttribute('data-tip', node.tip);
+
+  const rect = el('rect', {
+    class: 'node-bg',
+    x: r.x, y: r.y, width: r.w, height: r.h, rx: '8',
+    fill: node.fill, stroke: node.stroke,
+    'stroke-width': node.strokeW || '0.5'
+  });
+  g.appendChild(rect);
+
+  // Text lines — distribute vertically within the rect
+  const lines = node.label;
+  const lineH = 17;
+  const totalH = lines.length * lineH;
+  const startY = r.y + (r.h - totalH) / 2 + lineH * 0.55;
+
+  lines.forEach((line, i) => {
+    const t = el('text', {
+      x: r.midX, y: startY + i * lineH,
+      'font-size': i === 0 ? '13' : '11',
+      'font-weight': i === 0 ? '500' : '400',
+      fill: node.textFill ? (node.textFill[i] || node.textFill[0]) : '#2C2C2A',
+      'font-family': 'inherit',
+      'text-anchor': 'middle',
+      'dominant-baseline': 'central'
+    }, line);
+    g.appendChild(t);
+  });
+
+  svg.appendChild(g);
+});
+
+// ── Mount ──
+document.getElementById('map-card').appendChild(svg);
+
+// ── Tooltip ──
+const tip = document.getElementById('tooltip');
+document.querySelectorAll('[data-tip]').forEach(el2 => {
+  el2.addEventListener('mouseenter', e => {
+    tip.textContent = el2.dataset.tip;
+    tip.style.opacity = '1';
+  });
+  el2.addEventListener('mousemove', e => {
+    tip.style.left = (e.clientX + 14) + 'px';
+    tip.style.top  = (e.clientY - 10) + 'px';
+  });
+  el2.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+});
+</script>
+</body>
+</html>
