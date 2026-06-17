@@ -127,10 +127,10 @@ const LAYOUT = {
   nodeW: 210,   // node width
   nodeH:  70,   // project/concept node height
   srcH:   44,   // data source node height
-  teamH:  44,   // team node height
+  teamH:  54,   // team node height
   biH:    56,   // BI node height
   svgW:  1200,   // total SVG canvas width  ← change to widen canvas
-  svgH:  1050,   // total SVG canvas height ← change to lengthen canvas
+  svgH:  1150,   // total SVG canvas height ← change to lengthen canvas
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -218,7 +218,7 @@ const NODES = [
     id:'netMap', col:'ona', row:'proj1', type:'project',
     label:['Network mapping','Connectivity, silos, Outlook data','🔷 Exploratory'],
     fill:'#FAEEDA', stroke:'#FAC775', textFill:['#412402','#854F0B','#854F0B'],
-    tip:'Owner: People Analytics . Map org collaboration graph; detect silos; connectivity scores. Outlook data integration planned.'
+    tip:'Owner: People Analytics. Map org collaboration graph; detect silos; connectivity scores. Outlook data integration planned.'
   },
   {
     id:'connections', col:'ona', row:'proj2', type:'project',
@@ -303,27 +303,27 @@ const NODES = [
   },
   // Row 2 (y=776): People Analytics | Talent Digital Enablement | CFA Supply
   {
-    id:'tPA', type:'team', x:850, y:854, teamW:168,
+    id:'tPA', type:'team', x:850, y:875, teamW:168,
     label:['People Analytics'],
     fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
     strokeW: 1,
-    tip:'People Analytics : owns Network Mapping; analytics layer for Connections app; all ONA methodology'
+    tip:'People Analytics: owns Network Mapping; analytics layer for Connections app; all ONA methodology'
   },
   {
-    id:'tTDE', type:'team', x:316, y:854, teamW:210,
+    id:'tTDE', type:'team', x:316, y:875, teamW:210,
     label:['Talent Digital Enablement'],
     fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
     tip:'Talent Digital Enablement: co-owns job architecture data layer and Connections app product vision'
   },
   {
-    id:'tSC', type:'team', x:604, y:854, teamW:130,
+    id:'tSC', type:'team', x:604, y:875, teamW:130,
     label:['CFA Supply'],
     fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
     tip:'CFA Supply: wants to adapt the SSA capacity modeling framework for their own planning needs'
   },
-  // Row 3 (y=846): Talent Acquisition — sits alone, centred under capacity work
+  // Row 3 (y=846): Culture 
   {
-    id:'tCult', type:'team', x:850, y:940, teamW:180,
+    id:'tCult', type:'team', x:850, y:975, teamW:180,
     label:['Culture'],
     fill:'#EAF3DE', stroke:'#97C459', textFill:['#173404'],
     tip:'Culture: owns culture-related initiatives and programs'
